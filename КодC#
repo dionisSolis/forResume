@@ -1,0 +1,216 @@
+using System;
+
+namespace qwerty
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            const string MenuAddBook = "1";
+            const string MenuRemoveBook = "2";
+            const string MenuShowAllBooks = "3";
+            const string MenuShowBooksByParameter = "4";
+            const string MenuExit = "exit";
+
+            Library library = new Library();
+            bool isPlay = true;
+
+            while (isPlay == true)
+            {
+                Console.Write("Х Р А Н И Л И Щ Е  К Н И Г\n" +
+                    $"{MenuAddBook})Добавить книгу " +
+                    $"\n{MenuRemoveBook})Удалить книгу " +
+                    $"\n{MenuShowAllBooks})Вывести список всех книг " +
+                    $"\n{MenuShowBooksByParameter})Вывести список книг по указанному параметру " +
+                    $"\nВведите номер команды({MenuExit} для выхода)\n" +
+                    $"Ввод...");
+
+                switch (Console.ReadLine())
+                {
+                    case MenuAddBook:
+                        library.AddBook();
+                        break;
+
+                    case MenuRemoveBook:
+                        library.RemoveBook();
+                        break;
+
+                    case MenuShowAllBooks:
+                        library.ShowAllBooks();
+                        break;
+
+                    case MenuShowBooksByParameter:
+                        library.ShowBooksByParameter();
+                        break;
+
+                    case MenuExit:
+                        isPlay = false;
+                        break;
+
+                    default:
+                        Console.WriteLine("Ошибка ввода");
+                        break;
+                }
+
+                Console.Write("\n\nНажмите любую кнопку для обновления...");
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+    }
+
+    class Library
+    {
+        private List<Book> _books;
+
+        public Library()
+        {
+            _books = new List<Book>();
+        }
+
+        public void AddBook()
+        {
+            Console.Write("\nНазвание: ");
+            string title = Console.ReadLine();
+
+            Console.Write("\nАвтор: ");
+            string author = Console.ReadLine();
+
+            int yearRelease = EnterCorrectYear();
+
+            _books.Add(new Book(title, author, yearRelease));
+        }
+
+        public void RemoveBook()
+        {
+            Console.WriteLine("\nНомер книги: ");
+            int numberBook;
+
+            while (int.TryParse(Console.ReadLine(), out numberBook) == false || numberBook < 1 || numberBook > _books.Count)
+            {
+                Console.Write("\nВведите корректный номер\nНомер книги: ");
+            }
+
+            _books.RemoveAt(numberBook - 1);
+        }
+
+        public void ShowAllBooks()
+        {
+            Console.WriteLine("\nВсе книги");
+
+            for (int i = 0; i < _books.Count; i++)
+            {
+                Console.Write(i + 1 + ")");
+                _books[i].ShowInfo();
+            }
+        }
+
+        public void ShowBooksByParameter()
+        {
+            const string ParameterTitle = "название";
+            const string ParameterAuthor = "автор";
+            const string ParameterYearRelease = "год выпуска";
+
+            Console.Write($"\nВведите параметр ({ParameterTitle}, {ParameterAuthor}, {ParameterYearRelease}): ");
+            string parameter = Console.ReadLine().ToLower();
+
+            Console.Write("\nВведите значение: ");
+            string value = Console.ReadLine().ToLower();
+
+            Console.WriteLine("\nНайденные книги");
+
+            switch (parameter)
+            {
+                case ParameterTitle:
+                    ChooseBooksByTitle(value);
+                    break;
+
+                case ParameterAuthor:
+                    ChooseBooksByAuthor(value);
+                    break;
+
+                case ParameterYearRelease:
+                    ChooseBooksByYearRelease(value);
+                    break;
+
+                default:
+                    Console.WriteLine("Параметр не найден");
+                    return;
+            }
+        }
+
+        private int EnterCorrectYear()
+        {
+            int yearRelease = 0;
+            bool isValidYear = false;
+
+            while (isValidYear == false)
+            {
+                Console.Write("\nГод выпуска: ");
+
+                if (int.TryParse(Console.ReadLine(), out yearRelease) == false || yearRelease < 0 || yearRelease > DateTime.Now.Year)
+                {
+                    Console.WriteLine("Некорректный ввод для года выпуска. Пожалуйста, введите целое число.");
+                }
+                else
+                {
+                    isValidYear = true;
+                }
+            }
+
+            return yearRelease;
+        }
+
+        private void ChooseBooksByTitle(string value)
+        {
+            foreach (Book book in _books)
+            {
+                if (value == book.Title.ToLower())
+                {
+                    book.ShowInfo();
+                }
+            }
+        }
+
+        private void ChooseBooksByAuthor(string value)
+        {
+            foreach (Book book in _books)
+            {
+                if (value == book.Author.ToLower())
+                {
+                    book.ShowInfo();
+                }
+            }
+        }
+
+        private void ChooseBooksByYearRelease(string value)
+        {
+            foreach (Book book in _books)
+            {
+                if (value == book.YearRelease.ToString())
+                {
+                    book.ShowInfo();
+                }
+            }
+        }
+    }
+
+    class Book
+    {
+        public Book(string title, string author, int yearRelease)
+        {
+            Title = title;
+            Author = author;
+            YearRelease = yearRelease;
+        }
+
+        public string Title { get; private set; }
+        public string Author { get; private set; }
+        public int YearRelease { get; private set; }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine(Title + " - " + Author + " " + YearRelease + "г.");
+        }
+    }
+}
