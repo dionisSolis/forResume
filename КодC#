@@ -1,0 +1,157 @@
+using System;
+
+namespace qwerty
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            const string CommandExit = "exit";
+
+            Player player = new Player();
+            Deck deck = new Deck();
+            bool isPlay = true;
+
+            Console.WriteLine("К О Л О Д А  К А Р Т\n");
+
+            while (isPlay)
+            {
+                Console.WriteLine($"В колоде {deck.AmountOfCards}\nВведите количество карт для набора или {CommandExit} для выхода");
+                string userInput = Console.ReadLine();
+
+                if (userInput == CommandExit)
+                {
+                    isPlay = false;
+                }
+                else
+                {
+                    if (int.TryParse(userInput, out int amountOfTakingCards) == true)
+                    {
+                        if (amountOfTakingCards <= deck.AmountOfCards && amountOfTakingCards >= 1)
+                        {
+                            for (int i = 0; i < amountOfTakingCards; i++)
+                            {
+                                player.AddCard(deck.TryGetCard());
+                            }
+
+                            Console.WriteLine("УСПЕШНО!");
+                        }
+
+                        if (deck.AmountOfCards == 0)
+                        {
+                            isPlay = false;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("ОШИБКА ВВОДА");
+                    }
+                }
+
+                Console.Write("\n\nНажмите любую кнопку для обновления...");
+                Console.ReadKey();
+                Console.Clear();
+            }
+
+            player.ShowInfo();
+        }
+    }
+
+    class Player
+    {
+        private List<Card> _cards = new List<Card>();
+
+        public void ShowInfo()
+        {
+            Console.WriteLine("Колода игрока\n");
+
+            foreach (Card card in _cards)
+            {
+                card.ShowInfo();
+            }
+        }
+
+        public void AddCard(Card card)
+        {
+            if (card is not null)
+            {
+                _cards.Add(card);
+            }
+        }
+    }
+
+    class Deck
+    {
+        private List<Card> _cards = new List<Card>();
+
+        public int AmountOfCards 
+        { 
+            get { return _cards.Count; } 
+            private set { }
+        }
+        public Deck()
+        {
+            CreateCards();
+        }
+        public Card TryGetCard()
+        {
+            if (_cards.Count == 0)
+            {
+                return null;
+            }
+
+            Card card = _cards[0];
+
+            _cards.RemoveAt(0);
+
+            return card;
+        }
+
+        private void CreateCards()
+        {
+            string[] suits = { "черви", "крести", "пики", "буби" };
+            string[] values = { "6", "7", "8", "9", "10", "Валет", "Дама", "Король", "Туз" };
+
+            foreach (string value in values)
+            {
+                foreach (string suit in suits)
+                {
+                    _cards.Add(new Card(value, suit));
+                }
+            }
+
+            ShuffleList();
+        }
+
+        private void ShuffleList()
+        {
+            Random random = new Random();
+            
+            for (int i = 0; i < _cards.Count; i++)
+            {
+                int index = random.Next(_cards.Count);
+                Card card = _cards[i];
+
+                _cards[i] = _cards[index];
+                _cards[index] = card;            
+            }
+        }
+    }
+
+    class Card
+    {
+        private string _value;
+        private string _suit;
+
+        public Card(string value, string suit)
+        {
+            _value = value;
+            _suit = suit;
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"{_value} {_suit}");
+        }
+    }
+}
